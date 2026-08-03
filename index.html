@@ -121,7 +121,7 @@
             </div>
         </section>
 
-        <!-- NIKAD BOLJI KALKULATOR -->
+        <!-- KALKULATOR -->
         <section class="glass rounded-3xl p-6 md:p-8 border border-dark-700/60 relative overflow-hidden">
             <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
                 <div>
@@ -132,7 +132,6 @@
                     <p class="text-xs text-slate-400">Izračunaj koliko sipaš ili koliko te košta putovanje</p>
                 </div>
                 
-                <!-- Tabovi za izbornik -->
                 <div class="bg-dark-800 p-1 rounded-2xl border border-dark-700 flex text-xs">
                     <button id="tab-money" onclick="switchTab('money')" class="tab-btn active px-4 py-2 rounded-xl transition-all">Sipam za novac</button>
                     <button id="tab-trip" onclick="switchTab('trip')" class="tab-btn text-slate-400 px-4 py-2 rounded-xl transition-all">Kalkulator za Put</button>
@@ -159,25 +158,24 @@
 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">Prosječna potrošnja tvog auta (L/100km)</label>
+                        <label class="block text-xs text-slate-400 mb-1">Prosječna potrošnja auta (L/100km)</label>
                         <input type="number" id="m-consumption" value="6.5" step="0.1" oninput="calculateMoney()" placeholder="npr. 6.5" class="w-full bg-dark-800 border border-dark-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-neon-emerald">
                     </div>
                 </div>
 
-                <!-- Rezultat Mod 1 -->
                 <div class="bg-dark-800/80 border border-dark-700 rounded-2xl p-5 flex flex-col justify-center space-y-4">
                     <div>
                         <span class="text-xs text-slate-400">Dobijaš goriva:</span>
                         <div class="text-3xl font-black text-neon-emerald" id="res-liters">14.18 L</div>
                     </div>
                     <div class="border-t border-dark-700 pt-3">
-                        <span class="text-xs text-slate-400">Procjena dometa (kilometraža):</span>
+                        <span class="text-xs text-slate-400">Procjena dometa:</span>
                         <div class="text-xl font-bold text-white" id="res-range">~ 218 km</div>
                     </div>
                 </div>
             </div>
 
-            <!-- MOD 2: Kalkulator za Put -->
+            <!-- MOD 2: Put -->
             <div id="calc-mode-trip" class="grid md:grid-cols-3 gap-6 hidden">
                 <div class="space-y-4">
                     <div>
@@ -189,7 +187,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">Dužina puta u kilometrima (km)</label>
+                        <label class="block text-xs text-slate-400 mb-1">Dužina puta (km)</label>
                         <input type="number" id="t-distance" value="150" oninput="calculateTrip()" placeholder="npr. 150" class="w-full bg-dark-800 border border-dark-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-neon-emerald">
                     </div>
                 </div>
@@ -201,14 +199,13 @@
                     </div>
                 </div>
 
-                <!-- Rezultat Mod 2 -->
                 <div class="bg-dark-800/80 border border-dark-700 rounded-2xl p-5 flex flex-col justify-center space-y-4">
                     <div>
                         <span class="text-xs text-slate-400">Ukupan trošak puta:</span>
                         <div class="text-3xl font-black text-neon-blue" id="res-trip-cost">13.75 KM</div>
                     </div>
                     <div class="border-t border-dark-700 pt-3">
-                        <span class="text-xs text-slate-400">Potrebno litara goriva:</span>
+                        <span class="text-xs text-slate-400">Potrebno goriva:</span>
                         <div class="text-xl font-bold text-white" id="res-trip-liters">9.75 L</div>
                     </div>
                 </div>
@@ -228,7 +225,6 @@
     </footer>
 
     <script>
-        // Prebacivanje tabova u kalkulatoru
         function switchTab(mode) {
             document.getElementById('calc-mode-money').classList.toggle('hidden', mode !== 'money');
             document.getElementById('calc-mode-trip').classList.toggle('hidden', mode !== 'trip');
@@ -240,7 +236,6 @@
             document.getElementById('tab-trip').classList.toggle('text-slate-400', mode !== 'trip');
         }
 
-        // Kalkulacija Mod 1 (Sipam za novac)
         function calculateMoney() {
             const price = parseFloat(document.getElementById('m-fuel').value);
             const amount = parseFloat(document.getElementById('m-amount').value) || 0;
@@ -253,7 +248,6 @@
             document.getElementById('res-range').innerText = "~ " + Math.round(range) + " km";
         }
 
-        // Kalkulacija Mod 2 (Kalkulator za Put)
         function calculateTrip() {
             const price = parseFloat(document.getElementById('t-fuel').value);
             const dist = parseFloat(document.getElementById('t-distance').value) || 0;
@@ -266,7 +260,6 @@
             document.getElementById('res-trip-liters').innerText = litersNeeded.toFixed(2) + " L";
         }
 
-        // ApexCharts Konfiguracija
         const options = {
             series: [{
                 name: 'Eurosuper 95',
