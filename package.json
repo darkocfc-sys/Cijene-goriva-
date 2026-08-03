@@ -1,17 +1,15 @@
 {
-  "name": "cijenegoriva-me",
+  "name": "cijene-goriva-cg",
   "version": "1.0.0",
-  "description": "Pracenje cijena goriva u Crnoj Gori",
+  "description": "Zvanične cijene goriva u CG, Berza i Region",
   "main": "server.js",
-  "type": "commonjs",
   "scripts": {
-    "start": "node server.js",
-    "scrape": "node scraper.js"
+    "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.19.2",
-    "cheerio": "^1.0.0",
-    "node-cron": "^3.0.3",
-    "better-sqlite3": "^11.3.0"
+    "axios": "^1.6.8",
+    "cheerio": "^1.0.0-rc.12",
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
   }
 }
