@@ -46,8 +46,10 @@ async function getCrnaGoraPrices() {
         const text = $art('body').text();
 
         const prices = {};
-        const bmb98 = text.match(/BMB\s*98[^\d]*(\d+[,.]\d+)/i);
-        const bmb95 = text.match(/BMB\s*95[^\d]*(\d+[,.]\d+)/i);
+
+        // Poboljšani RegEx-i koji hvataju "Eurosuper 98", "BMB 98", "Eurosuper BMB 98" i sl.
+        const bmb98 = text.match(/(?:eurosuper|bmb)\s*(?:bmb)?\s*98[^\d]*(\d+[,.]\d+)/i);
+        const bmb95 = text.match(/(?:eurosuper|bmb)\s*(?:bmb)?\s*95[^\d]*(\d+[,.]\d+)/i);
         const dizel = text.match(/Eurodizel[^\d]*(\d+[,.]\d+)/i);
         const lozulje = text.match(/Lož\s*ulje[^\d]*(\d+[,.]\d+)/i);
 
