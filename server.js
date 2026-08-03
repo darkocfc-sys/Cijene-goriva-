@@ -1,85 +1,160 @@
 const express = require('express');
+const cors = require('cors');
 const path = require('path');
-const fs = require('fs');
 const cron = require('node-cron');
-const { runScraper } = require('./scraper');
+const db = require('./db');
+const { scrapePrices } = require('./scraper');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DATA_FILE = path.join(__dirname, 'data', 'latest.json');
 
-// Podrazumijevani rezervni podaci (ako JSON fajl uopšte ne postoji)
-const FALLBACK_DATA = {
-    updated_at: new Date().toISOString(),
-    prices: {
-        is_new_available: false,
-        current: { bmb98: '1.54', bmb95: '1.50', dizel: '1.41', lozulje: '1.37' },
-        next: null
-    },
-    oil: { price: '76.40', change: '+0.25' },
-    region: {
-        srbija: { bmb95: '1.53', dizel: '1.65' },
-        bih: { bmb95: '1.32', dizel: '1.34' },
-        hrvatska: { bmb95: '1.46', dizel: '1.39' }
-    }
-};
-
+// Middleware
+app.use(cors());
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// GET /api/prices
-app.get('/api/prices', async (req, res) => {
-    try {
-        if (fs.existsSync(DATA_FILE)) {
-            const rawData = fs.readFileSync(DATA_FILE, 'utf8');
-            const parsedData = JSON.parse(rawData);
-            return res.json(parsedData);
-        }
+// ============================================================
+// API Routes
+// ============================================================
 
-        // Ako fajl ne postoji, pokreni skraper
-        console.log('[API] DATA_FILE ne postoji. Pokrećem skraper...');
-        const newData = await runScraper();
-        if (newData) {
-            return res.json(newData);
-        }
+/**
+ * GET /api/prices
+ * Current fuel prices
+ */
+app.get('/api/prices', (req, res) => {
+  try {
+    const prices = db.getPrices();
+    res.json({
+      success: true,
+      data: prices,
+      cached: false
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
-        // Ako skraper vrati null, vrati fallback podatke umjesto greške
-        return res.json(FALLBACK_DATA);
-    } catch (err) {
-        console.error('Greška na /api/prices:', err.message);
-        return res.json(FALLBACK_DATA);
+/**
+ * GET /api/history/:fuelId
+ * Historical prices for a specific fuel
+ */
+app.get('/api/history/:fuelId', (req, res) => {
+  try {
+    const { fuelId } = req.params;
+    const limit = parseInt(req.query.limit) || 52;
+    const history = db.getHistory(fuelId, limit);
+
+    res.json({
+      success: true,
+      fuelId,
+      data: history,
+      count: Array.isArray(history) ? history.length : Object.keys(history).length
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * GET /api/history
+ * All historical data
+ */
+app.get('/api/history', (req, res) => {
+  try {
+    const history = db.getHistory();
+    res.json({
+      success: true,
+      data: history
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * POST /api/scrape
+ * Trigger manual scrape (protected in production)
+ */
+app.post('/api/scrape', async (req, res) => {
+  try {
+    const secret = req.headers['x-scrape-secret'];
+    if (process.env.SCRAPE_SECRET && secret !== process.env.SCRAPE_SECRET) {
+      return res.status(401).json({ success: false, error: 'Unauthorized' });
     }
+
+    const result = await scrapePrices();
+    res.json({
+      success: true,
+      message: 'Scrape completed',
+      data: result
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
-// GET /api/refresh - ručno okidanje
-app.get('/api/refresh', async (req, res) => {
+/**
+ * GET /api/stats
+ * Database statistics
+ */
+app.get('/api/stats', (req, res) => {
+  try {
+    const stats = db.getStats();
+    res.json({
+      success: true,
+      data: stats
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * GET /api/health
+ * Health check
+ */
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    version: require('./package.json').version
+  });
+});
+
+// ============================================================
+// Scheduled scraping (every Monday at 08:00 CET)
+// Montenegro updates prices every 7 days
+// ============================================================
+if (process.env.NODE_ENV !== 'test') {
+  cron.schedule('0 8 * * 1', async () => {
+    console.log('[CRON] Scheduled scrape started');
     try {
-        const newData = await runScraper();
-        if (newData) {
-            res.json({ success: true, message: 'Podaci uspješno osvježeni!', updated_at: newData.updated_at });
-        } else {
-            res.status(500).json({ success: false, error: 'Skraper je vratio null. Provjerite logove.' });
-        }
+      await scrapePrices();
+      console.log('[CRON] Scheduled scrape completed');
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+      console.error('[CRON] Scheduled scrape failed:', err.message);
     }
-});
+  }, {
+    timezone: 'Europe/Podgorica'
+  });
 
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+  console.log('[CRON] Scheduled: Every Monday at 08:00 CET');
+}
 
-// AUTOMATIZACIJA (CRON JOBS)
-cron.schedule('*/15 8-20 * * 1,2', async () => {
-    console.log('[CRON] Pokretanje skrapera (Ponedjeljak/Utorak)...');
-    await runScraper();
-});
-
-cron.schedule('0 */6 * * *', async () => {
-    console.log('[CRON] Redovno 6-časovno osvežavanje...');
-    await runScraper();
-});
-
+// ============================================================
+// Start server
+// ============================================================
 app.listen(PORT, () => {
-    console.log(`Server pokrenut na portu ${PORT}`);
-    runScraper().catch(err => console.error('Greška pri startnom skrapovanju:', err.message));
+  console.log(`\\n🚀 Gorivo.me server running on http://localhost:${PORT}`);
+  console.log(`📊 API endpoints:`);
+  console.log(`   GET  /api/prices          - Current prices`);
+  console.log(`   GET  /api/history         - All history`);
+  console.log(`   GET  /api/history/:fuelId - Fuel history`);
+  console.log(`   GET  /api/stats           - Statistics`);
+  console.log(`   POST /api/scrape          - Trigger scrape`);
+  console.log(`   GET  /api/health          - Health check`);
+  console.log(`\\n⛽ Last updated: ${db.getPrices().lastUpdated}\\n`);
 });
+
+module.exports = app;

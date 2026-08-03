@@ -1,57 +1,76 @@
-# cijenegoriva.me
+# ⛽ Gorivo.me — Cijene goriva u Crnoj Gori
 
-Sajt koji prati zvanične cijene goriva u Crnoj Gori, sa gov.me.
+Zvanični podaci o cijenama goriva u Crnoj Gori. Ažuriranje svakih 7 dana u skladu sa odlukama Ministarstva energetike i rudarstva.
 
-## Šta je unutra
+## 🚀 Brzi start
 
-- `scraper.js` — provjerava gov.me i izvlači cijene iz najnovijeg članka
-- `db.js` — SQLite baza, čuva istoriju cijena
-- `server.js` — web server (Express) + raspored (cron) za automatsko pokretanje scrapera
-- `public/index.html` — stranica koja prikazuje trenutne cijene
+```bash
+# 1. Instaliraj zavisnosti
+npm install
 
-## Korak 1: Stavi kod na GitHub
+# 2. Kopiraj env fajl
+ cp .env.example .env
 
-1. Idi na github.com, klikni "New repository"
-2. Nazovi ga npr. `cijenegoriva-me`, ostavi "Public" ili "Private" (svejedno je za Render)
-3. NE dodaj README/gitignore preko GitHub-a (mi već imamo)
-4. Na svom računaru (ili direktno preko "upload files" na GitHub sajtu ako ti je lakše):
-   - Upload-uj SVE fajlove iz ovog projekta osim `node_modules` i `data` foldera (oni se ne prate, `.gitignore` se za to brine ako radiš preko terminala)
+# 3. Pokreni server
+npm start
 
-Ako nemaš iskustva sa Git komandama, najlakše je:
-- Otvori novi repo na GitHub-u
-- Klikni "uploading an existing file"
-- Prevuci sve fajlove (package.json, server.js, scraper.js, db.js, public/index.html, .gitignore, README.md)
-- Klikni "Commit changes"
-
-## Korak 2: Poveži GitHub repo sa Render-om
-
-1. Idi na render.com, uloguj se preko GitHub-a
-2. Klikni "New +" → "Web Service"
-3. Izaberi svoj `cijenegoriva-me` repo
-4. Podešavanja:
-   - **Build Command:** `npm install`
-   - **Start Command:** `npm start`
-   - **Instance Type:** Free (za početak)
-5. Klikni "Create Web Service"
-
-Render će sam instalirati zavisnosti i pokrenuti sajt. Dobićeš privremeni URL tipa `cijenegoriva-me.onrender.com` — provjeri da sajt radi.
-
-## Korak 3: Poveži svoj domen (cijenegoriva.me)
-
-1. U Render-u, na stranici tvog servisa, idi na "Settings" → "Custom Domains"
-2. Dodaj `cijenegoriva.me` i `www.cijenegoriva.me`
-3. Render će ti dati CNAME/A record vrijednosti
-4. Idi kod registratora gdje si kupio domen → DNS podešavanja → dodaj te zapise
-5. Sačekaj da se DNS propagira (do par sati)
-
-## Napomena o besplatnom tier-u
-
-Render free web servisi "zaspu" nakon 15 min neaktivnosti i probude se kad neko pristupi sajtu (par sekundi kašnjenja na prvi zahtjev). Za mali sajt na početku to je sasvim OK. Free SQLite baza (`data/` folder) se BRIŠE pri svakom redeploy-u — čim projekat postane ozbiljniji, prelazi se na Render PostgreSQL (imaju besplatan tier).
-
-## Ručno testiranje scrapera
-
-Nakon deploy-a, možeš ručno pokrenuti scraping posjetom:
+# 4. Otvori u browseru
+open http://localhost:3000
 ```
-https://tvoj-sajt.onrender.com/api/scrape-now
+
+## 📁 Struktura projekta
+
 ```
-(Preporuka: kasnije zaštiti ovu rutu tajnim ključem prije nego sajt bude javno poznat.)
+cijenegoriva-me/
+├── public/
+│   └── index.html          # Frontend (povezan na API)
+├── data/
+│   ├── prices.json         # Trenutne cijene
+│   └── history.json        # Istorijski podaci
+├── server.js               # Express API server
+├── scraper.js              # Scraper zvaničnih izvora
+├── db.js                   # JSON baza podataka
+├── package.json
+└── .env.example
+```
+
+## 🔌 API Endpoints
+
+| Metoda | Endpoint | Opis |
+|--------|----------|------|
+| GET | `/api/prices` | Trenutne cijena goriva |
+| GET | `/api/history` | Sva istorijska kretanja |
+| GET | `/api/history/:fuelId` | Istorija za određeno gorivo |
+| POST | `/api/scrape` | Ručno pokretanje scrapera |
+| GET | `/api/stats` | Statistika baze |
+| GET | `/api/health` | Health check |
+
+## 🕐 Automatsko ažuriranje
+
+Scraper se automatski pokreće **svakog ponedjeljka u 08:00** (CET) preko `node-cron`.
+
+Ručno pokretanje:
+```bash
+npm run scrape
+# ili
+node scraper.js
+```
+
+## 📡 Izvori podataka
+
+- **Primarni:** [gov.me](https://www.gov.me) — Vlada Crne Gore, saopštenja o cijenama goriva
+- **Sekundarni:** Službeni list Crne Gore — Uredbe o formiranju cijena naftnih derivata
+- **Metodologija:** Platt's European Marketscan + devizni kurs + akcize i takse
+
+## 🗺️ Karakteristike
+
+- ✅ Realna fotografija Boke Kotorske sa zastavom Crne Gore
+- ✅ Vektorska mapa Crne Gore (SVG)
+- ✅ Dinamički grafikon kretanja cijena
+- ✅ Responzivan dizajn (mobile-first)
+- ✅ API za eksternu upotrebu
+- ✅ Automatski scraper sa fallback-om
+
+## 📝 Licenca
+
+MIT — Slobodno koristi i prilagođavaj.
