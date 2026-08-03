@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="sr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cijene Goriva Crna Gora | Najnovije cijene i Kalkulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            500: '#10b981',
+                            600: '#059669',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-emerald-500/10 p-2 rounded-xl border border-emerald-500/20 text-emerald-400">
+                    <i class="fa-solid fa-gas-pump text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-white leading-none">Cijene Goriva CG</h1>
+                    <span class="text-xs text-slate-400">Zvanični podaci za CG</span>
+                </div>
+            </div>
+            <!-- Barel Naftne Berze -->
+            <div class="bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/50 flex items-center space-x-2 text-xs">
+                <i class="fa-solid fa-chart-line text-emerald-400"></i>
+                <span class="text-slate-400 hidden sm:inline">Brent Sirova Nafta:</span>
+                <span class="font-bold text-white" id="brent-price">$78.50</span>
+                <span class="text-emerald-400 text-[10px]"><i class="fa-solid fa-caret-down"></i> -1.2%</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 py-6 space-y-8 w-full">
+
+        <!-- Banner Odbrojavanje -->
+        <div class="bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center space-x-3">
+                <i class="fa-regular fa-clock text-emerald-400 text-2xl"></i>
+                <div>
+                    <p class="text-sm font-semibold text-emerald-200">Sledeća korekcija cijena</p>
+                    <p class="text-xs text-slate-400">Ministarstvo energetike i rudarstva objavljuje obračun svake druge nedjelje.</p>
+                </div>
+            </div>
+            <span class="bg-emerald-500/20 text-emerald-300 font-bold px-3 py-1.5 rounded-xl text-xs border border-emerald-500/30 whitespace-nowrap">
+                Za 6 dana
+            </span>
+        </div>
+
+        <!-- Kartice sa Cijenama u CG -->
+        <section class="space-y-3">
+            <h2 class="text-sm font-bold tracking-wider text-slate-400 uppercase">Trenutne cijene u Crnoj Gori (€/L)</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                
+                <!-- BMB 95 -->
+                <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-4 space-y-2 relative overflow-hidden">
+                    <span class="text-xs font-semibold text-slate-400">Eurosuper 95</span>
+                    <div class="flex items-baseline space-x-1">
+                        <span class="text-2xl font-black text-white" id="price-bmb95">1.53</span>
+                        <span class="text-xs text-slate-400">€/L</span>
+                    </div>
+                    <div class="flex items-center text-[11px] text-emerald-400 font-medium">
+                        <i class="fa-solid fa-arrow-down mr-1"></i> -0.02 €
+                    </div>
+                </div>
+
+                <!-- BMB 98 -->
+                <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-4 space-y-2 relative overflow-hidden">
+                    <span class="text-xs font-semibold text-slate-400">Eurosuper 98</span>
+                    <div class="flex items-baseline space-x-1">
+                        <span class="text-2xl font-black text-white" id="price-bmb98">1.57</span>
+                        <span class="text-xs text-slate-400">€/L</span>
+                    </div>
+                    <div class="flex items-center text-[11px] text-emerald-400 font-medium">
+                        <i class="fa-solid fa-arrow-down mr-1"></i> -0.02 €
+                    </div>
+                </div>
+
+                <!-- Eurodizel -->
+                <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-4 space-y-2 relative overflow-hidden">
+                    <span class="text-xs font-semibold text-slate-400">Eurodizel</span>
+                    <div class="flex items-baseline space-x-1">
+                        <span class="text-2xl font-black text-white" id="price-dizel">1.41</span>
+                        <span class="text-xs text-slate-400">€/L</span>
+                    </div>
+                    <div class="flex items-center text-[11px] text-slate-400 font-medium">
+                        <i class="fa-solid fa-minus mr-1"></i> Nepromijenjeno
+                    </div>
+                </div>
+
+                <!-- Lož Ulje -->
+                <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-4 space-y-2 relative overflow-hidden">
+                    <span class="text-xs font-semibold text-slate-400">Lož Ulje</span>
+                    <div class="flex items-baseline space-x-1">
+                        <span class="text-2xl font-black text-white" id="price-loz">1.37</span>
+                        <span class="text-xs text-slate-400">€/L</span>
+                    </div>
+                    <div class="flex items-center text-[11px] text-emerald-400 font-medium">
+                        <i class="fa-solid fa-arrow-down mr-1"></i> -0.01 €
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Kalkulator -->
+        <section class="bg-slate-800/40 border border-slate-700/60 rounded-2xl p-5 space-y-4">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-calculator text-emerald-400"></i>
+                <h3 class="font-bold text-white">Kalkulator Troškova Goriva</h3>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Izaberi Gorivo</label>
+                    <select id="calc-fuel" onchange="calculateFuel()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-emerald-500">
+                        <option value="1.53">Eurosuper 95 (1.53 €)</option>
+                        <option value="1.57">Eurosuper 98 (1.57 €)</option>
+                        <option value="1.41" selected>Eurodizel (1.41 €)</option>
+                        <option value="1.37">Lož Ulje (1.37 €)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Unesi Iznos (€)</label>
+                    <input type="number" id="calc-euros" value="20" oninput="calculateFuel()" placeholder="npr. 20" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-emerald-500">
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 flex flex-col justify-center items-center text-center">
+                    <span class="text-xs text-slate-400">Dobijate približno:</span>
+                    <span id="calc-result" class="text-2xl font-black text-emerald-400">14.18 L</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Poređenje sa Regionom -->
+        <section class="space-y-3">
+            <div class="flex justify-between items-center">
+                <h2 class="text-sm font-bold tracking-wider text-slate-400 uppercase">Poređenje Cijena u Regionu (€/L)</h2>
+                <span class="text-[11px] text-slate-500">Ažurirano nedeljno</span>
+            </div>
+            
+            <div class="bg-slate-800/40 border border-slate-700/60 rounded-2xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-800/80 text-xs text-slate-400 uppercase border-b border-slate-700/60">
+                            <tr>
+                                <th class="p-3.5">Država</th>
+                                <th class="p-3.5">BMB 95</th>
+                                <th class="p-3.5">Eurodizel</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800 text-slate-200">
+                            <tr class="bg-emerald-500/10 font-bold">
+                                <td class="p-3.5 flex items-center space-x-2">
+                                    <span>🇲🇪</span> <span>Crna Gora</span>
+                                </td>
+                                <td class="p-3.5 text-emerald-400">1.53 €</td>
+                                <td class="p-3.5 text-emerald-400">1.41 €</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3.5 flex items-center space-x-2">
+                                    <span>🇸🇷</span> <span>Srbija</span>
+                                </td>
+                                <td class="p-3.5">1.61 €</td>
+                                <td class="p-3.5">1.69 €</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3.5 flex items-center space-x-2">
+                                    <span>🇧🇦</span> <span>BiH</span>
+                                </td>
+                                <td class="p-3.5">1.35 €</td>
+                                <td class="p-3.5">1.36 €</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3.5 flex items-center space-x-2">
+                                    <span>🇭🇷</span> <span>Hrvatska</span>
+                                </td>
+                                <td class="p-3.5">1.52 €</td>
+                                <td class="p-3.5">1.45 €</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3.5 flex items-center space-x-2">
+                                    <span>🇦🇱</span> <span>Albanija</span>
+                                </td>
+                                <td class="p-3.5">1.74 €</td>
+                                <td class="p-3.5">1.76 €</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 bg-slate-900 py-6 text-center text-xs text-slate-500 space-y-1">
+        <p>© 2026 cijenegoriva.me — Sva prava zadržana.</p>
+        <p>Informativni prikaz zvaničnih cijena naftnih derivata u Crnoj Gori.</p>
+    </footer>
+
+    <!-- Skripta za kalkulator i dinamiku -->
+    <script>
+        function calculateFuel() {
+            const price = parseFloat(document.getElementById('calc-fuel').value);
+            const euros = parseFloat(document.getElementById('calc-euros').value);
+            const resultElement = document.getElementById('calc-result');
+
+            if (isNaN(euros) || euros <= 0) {
+                resultElement.innerText = "0.00 L";
+                return;
+            }
+
+            const liters = (euros / price).toFixed(2);
+            resultElement.innerText = `${liters} L`;
+        }
+
+        // Automatsko povezivanje sa tvojim backend API-jem na Renderu
+        async function fetchPricesFromBackend() {
+            try {
+                const res = await fetch('/api/prices');
+                if (res.ok) {
+                    const data = await res.json();
+                    if(data.bmb95) document.getElementById('price-bmb95').innerText = data.bmb95;
+                    if(data.bmb98) document.getElementById('price-bmb98').innerText = data.bmb98;
+                    if(data.dizel) document.getElementById('price-dizel').innerText = data.dizel;
+                    if(data.loz) document.getElementById('price-loz').innerText = data.loz;
+                }
+            } catch (e) {
+                console.log("Servis radi na statičkim cijenama ili se API učitava...");
+            }
+        }
+
+        fetchPricesFromBackend();
+    </script>
+</body>
+</html>
