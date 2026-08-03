@@ -8,18 +8,16 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// API ruta za preuzimanje cijena
 app.get('/api/prices', async (req, res) => {
     try {
         const dataPath = path.join(__dirname, 'data', 'latest.json');
         
-        // Ako nema fajla ili je stariji od 6 sati, pokreni skraper
         let shouldScrape = true;
         if (fs.existsSync(dataPath)) {
             const stats = fs.statSync(dataPath);
             const now = new Date().getTime();
             const fileTime = new Date(stats.mtime).getTime();
-            if ((now - fileTime) < 6 * 60 * 60 * 1000) {
+            if ((now - fileTime) < 2 * 60 * 60 * 1000) { // Osvježava na svaka 2 sata radi nafte
                 shouldScrape = false;
             }
         }
@@ -41,6 +39,5 @@ app.get('/api/prices', async (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`Server radi na portu ${PORT}`);
-    // Pokreni skraper odmah po startu servera
     runScraper();
 });
