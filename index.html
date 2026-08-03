@@ -1,284 +1,310 @@
 <!DOCTYPE html>
-<html lang="sr" class="dark">
+<html lang="sr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cijene Goriva CG | Pro Dashboard & Kalkulator</title>
-    
-    <!-- Moderni Font: Geist -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.1.0/dist/font/sans.css">
-    <!-- Tailwind CSS -->
+    <title>Cijene Goriva Crna Gora & Region</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Ikone -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- ApexCharts -->
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Geist Sans', 'sans-serif'] },
-                    colors: {
-                        dark: {
-                            900: '#09090b',
-                            800: '#111114',
-                            700: '#1f1f23',
-                        },
-                        neon: {
-                            emerald: '#10b981',
-                            blue: '#3b82f6',
-                            rose: '#f43f5e',
-                            amber: '#f59e0b'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body { background-color: #09090b; color: #e4e4e7; }
-        .glass {
-            background: rgba(23, 23, 27, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
-        .tab-btn.active {
-            background-color: #10b981;
-            color: #09090b;
-            font-weight: 700;
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Inter', sans-serif; } </style>
 </head>
-<body class="font-sans antialiased min-h-screen flex flex-col justify-between">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
+
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-emerald-500/10 via-cyan-500/5 to-transparent blur-3xl -z-10 pointer-events-none"></div>
 
     <!-- Header -->
-    <header class="border-b border-dark-700 bg-dark-900/80 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="bg-neon-emerald/10 p-3 rounded-2xl border border-neon-emerald/20 text-neon-emerald">
-                    <i class="fa-solid fa-gas-pump text-2xl"></i>
+    <header class="border-b border-slate-800/80 backdrop-blur-md sticky top-0 z-50 bg-slate-950/70">
+        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center font-black text-slate-950 text-xl shadow-lg shadow-emerald-500/20">
+                    ⛽
                 </div>
-                <div>
-                    <h1 class="text-xl font-black tracking-tighter text-white">CIJENE GORIVA CG</h1>
-                    <span class="text-xs text-slate-500 font-medium">Analitika & Kalkulator Potrošnje</span>
-                </div>
+                <span class="font-bold text-lg tracking-tight text-white">
+                    Cijene Goriva <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 ml-1">ME</span>
+                </span>
             </div>
-            
-            <div class="glass px-4 py-2 rounded-full flex items-center space-x-3 text-sm border border-dark-700">
-                <div class="relative flex h-3 w-3">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon-emerald opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-3 w-3 bg-neon-emerald"></span>
-                </div>
-                <span class="text-slate-400 hidden sm:inline">Brent Nafta:</span>
-                <span class="font-bold text-white">$78.50</span>
-                <span class="text-neon-rose text-xs font-bold"><i class="fa-solid fa-caret-down"></i> -1.2%</span>
+            <div id="update-tag" class="text-xs text-slate-400 font-medium bg-slate-900 px-3 py-1.5 rounded-full border border-slate-800">
+                Učitavanje...
             </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-6 py-8 space-y-8 w-full flex-grow">
+    <main class="max-w-5xl mx-auto px-4 py-8 flex-1 w-full space-y-8">
 
-        <!-- Kartice sa Cijenama -->
-        <section class="space-y-3">
-            <h2 class="text-xs font-bold tracking-wider text-slate-500 uppercase">Trenutne Zvanične Cijene</h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="glass rounded-2xl p-4 border border-dark-700/50">
-                    <span class="text-xs font-semibold text-slate-400">Eurosuper 95</span>
-                    <div class="flex items-baseline space-x-1 my-1">
-                        <span class="text-2xl font-black text-white" id="price-bmb95">1.53</span>
-                        <span class="text-xs font-bold text-slate-500">KM/L</span>
-                    </div>
-                    <span class="text-[10px] text-neon-emerald font-semibold bg-neon-emerald/10 px-2 py-0.5 rounded-full">-0.02 KM</span>
-                </div>
-                <div class="glass rounded-2xl p-4 border border-dark-700/50">
-                    <span class="text-xs font-semibold text-slate-400">Eurosuper 98</span>
-                    <div class="flex items-baseline space-x-1 my-1">
-                        <span class="text-2xl font-black text-white" id="price-bmb98">1.57</span>
-                        <span class="text-xs font-bold text-slate-500">KM/L</span>
-                    </div>
-                    <span class="text-[10px] text-neon-emerald font-semibold bg-neon-emerald/10 px-2 py-0.5 rounded-full">-0.02 KM</span>
-                </div>
-                <div class="glass rounded-2xl p-4 border border-dark-700/50">
-                    <span class="text-xs font-semibold text-slate-400">Eurodizel</span>
-                    <div class="flex items-baseline space-x-1 my-1">
-                        <span class="text-2xl font-black text-white" id="price-dizel">1.41</span>
-                        <span class="text-xs font-bold text-slate-500">KM/L</span>
-                    </div>
-                    <span class="text-[10px] text-slate-400 font-semibold bg-dark-700 px-2 py-0.5 rounded-full">Stabilno</span>
-                </div>
-                <div class="glass rounded-2xl p-4 border border-dark-700/50">
-                    <span class="text-xs font-semibold text-slate-400">Lož Ulje</span>
-                    <div class="flex items-baseline space-x-1 my-1">
-                        <span class="text-2xl font-black text-white" id="price-loz">1.37</span>
-                        <span class="text-xs font-bold text-slate-500">KM/L</span>
-                    </div>
-                    <span class="text-[10px] text-neon-emerald font-semibold bg-neon-emerald/10 px-2 py-0.5 rounded-full">-0.01 KM</span>
-                </div>
+        <!-- Hero section -->
+        <section class="relative overflow-hidden rounded-3xl bg-gradient-to-b from-slate-900 to-slate-900/40 border border-slate-800 p-6 md:p-8 text-center space-y-4 shadow-2xl">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/50 text-xs font-medium text-emerald-400">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                Zvanični cjenovnik & Svjetska berza
+            </div>
+            <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight">
+                Cijene goriva u <span class="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">Crnoj Gori</span>
+            </h1>
+            <p class="text-slate-400 text-sm md:text-base max-w-xl mx-auto">
+                Automatski preuzete zvanične maloprodajne cijene i kretanje sirove nafte na berzi.
+            </p>
+
+            <!-- Obavještenje o novim cijenama -->
+            <div class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs md:text-sm font-medium">
+                <span>⏰</span>
+                <span>Nove cijene stupaju na snagu u <strong>utorak u ponoć</strong> (noć sa ponedjeljka na utorak).</span>
             </div>
         </section>
 
-        <!-- KALKULATOR -->
-        <section class="glass rounded-3xl p-6 md:p-8 border border-dark-700/60 relative overflow-hidden">
-            <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
+        <!-- Nafta (Brent) Banner -->
+        <div class="rounded-2xl bg-slate-900/80 border border-slate-800 p-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xl">
+                    🛢️
+                </div>
                 <div>
-                    <h2 class="text-xl font-black text-white flex items-center gap-2">
-                        <i class="fa-solid fa-calculator text-neon-emerald"></i>
-                        Pametni Kalkulator Goriva
-                    </h2>
-                    <p class="text-xs text-slate-400">Izračunaj koliko sipaš ili koliko te košta putovanje</p>
+                    <h4 class="text-xs text-slate-400 uppercase font-bold">Sirova nafta (Brent Crude)</h4>
+                    <p class="text-xs text-slate-500">Svjetska berzanska cijena</p>
                 </div>
+            </div>
+            <div class="text-right">
+                <div class="text-2xl font-black text-white" id="oil-price">$ --</div>
+                <div class="text-xs font-semibold" id="oil-change">--%</div>
+            </div>
+        </div>
+
+        <!-- CG Fuel Cards Grid -->
+        <div>
+            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">🇲🇪 Crna Gora</h3>
+            <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+
+                <!-- BMB 98 -->
+                <div class="rounded-2xl bg-slate-900/60 border border-slate-800 p-5 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Benzin</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">98</span>
+                        </div>
+                        <h3 class="text-slate-300 font-semibold text-sm">Eurosuper BMB 98</h3>
+                        <div class="mt-2 flex items-baseline gap-1">
+                            <span id="price-bmb98" class="text-3xl font-extrabold text-white tracking-tight">--</span>
+                            <span class="text-slate-400 text-xs font-medium">€/L</span>
+                        </div>
+                    </div>
+                    <div id="next-bmb98-container" class="mt-4 pt-3 border-t border-slate-800/80 hidden">
+                        <span class="text-[11px] text-slate-400 block font-medium">Od utorka u ponoć:</span>
+                        <div class="flex items-center justify-between mt-1">
+                            <span id="next-bmb98" class="text-base font-bold text-slate-200">-- €</span>
+                            <span id="diff-bmb98" class="text-xs font-semibold px-2 py-0.5 rounded">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BMB 95 -->
+                <div class="rounded-2xl bg-slate-900/60 border border-slate-800 p-5 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Benzin</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">95</span>
+                        </div>
+                        <h3 class="text-slate-300 font-semibold text-sm">Eurosuper BMB 95</h3>
+                        <div class="mt-2 flex items-baseline gap-1">
+                            <span id="price-bmb95" class="text-3xl font-extrabold text-white tracking-tight">--</span>
+                            <span class="text-slate-400 text-xs font-medium">€/L</span>
+                        </div>
+                    </div>
+                    <div id="next-bmb95-container" class="mt-4 pt-3 border-t border-slate-800/80 hidden">
+                        <span class="text-[11px] text-slate-400 block font-medium">Od utorka u ponoć:</span>
+                        <div class="flex items-center justify-between mt-1">
+                            <span id="next-bmb95" class="text-base font-bold text-slate-200">-- €</span>
+                            <span id="diff-bmb95" class="text-xs font-semibold px-2 py-0.5 rounded">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Eurodizel -->
+                <div class="rounded-2xl bg-slate-900/60 border border-slate-800 p-5 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Dizel</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">ED</span>
+                        </div>
+                        <h3 class="text-slate-300 font-semibold text-sm">Eurodizel</h3>
+                        <div class="mt-2 flex items-baseline gap-1">
+                            <span id="price-dizel" class="text-3xl font-extrabold text-white tracking-tight">--</span>
+                            <span class="text-slate-400 text-xs font-medium">€/L</span>
+                        </div>
+                    </div>
+                    <div id="next-dizel-container" class="mt-4 pt-3 border-t border-slate-800/80 hidden">
+                        <span class="text-[11px] text-slate-400 block font-medium">Od utorka u ponoć:</span>
+                        <div class="flex items-center justify-between mt-1">
+                            <span id="next-dizel" class="text-base font-bold text-slate-200">-- €</span>
+                            <span id="diff-dizel" class="text-xs font-semibold px-2 py-0.5 rounded">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lož ulje -->
+                <div class="rounded-2xl bg-slate-900/60 border border-slate-800 p-5 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Ulje</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">LU</span>
+                        </div>
+                        <h3 class="text-slate-300 font-semibold text-sm">Lož ulje</h3>
+                        <div class="mt-2 flex items-baseline gap-1">
+                            <span id="price-lozulje" class="text-3xl font-extrabold text-white tracking-tight">--</span>
+                            <span class="text-slate-400 text-xs font-medium">€/L</span>
+                        </div>
+                    </div>
+                    <div id="next-lozulje-container" class="mt-4 pt-3 border-t border-slate-800/80 hidden">
+                        <span class="text-[11px] text-slate-400 block font-medium">Od utorka u ponoć:</span>
+                        <div class="flex items-center justify-between mt-1">
+                            <span id="next-lozulje" class="text-base font-bold text-slate-200">-- €</span>
+                            <span id="diff-lozulje" class="text-xs font-semibold px-2 py-0.5 rounded">--</span>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+
+        <!-- Region Section -->
+        <div class="space-y-4">
+            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider">🌍 Cijene u Regionu (Prosjek)</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 
-                <div class="bg-dark-800 p-1 rounded-2xl border border-dark-700 flex text-xs">
-                    <button id="tab-money" onclick="switchTab('money')" class="tab-btn active px-4 py-2 rounded-xl transition-all">Sipam za novac</button>
-                    <button id="tab-trip" onclick="switchTab('trip')" class="tab-btn text-slate-400 px-4 py-2 rounded-xl transition-all">Kalkulator za Put</button>
+                <!-- Srbija -->
+                <div class="rounded-2xl bg-slate-900/40 border border-slate-800 p-4">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-lg">🇷🇸</span>
+                        <span class="font-bold text-sm text-slate-200">Srbija</span>
+                    </div>
+                    <div class="flex justify-between text-xs py-1 border-b border-slate-800">
+                        <span class="text-slate-400">BMB 95</span>
+                        <span class="font-bold text-white" id="rs-bmb95">-- €</span>
+                    </div>
+                    <div class="flex justify-between text-xs py-1 pt-2">
+                        <span class="text-slate-400">Eurodizel</span>
+                        <span class="font-bold text-white" id="rs-dizel">-- €</span>
+                    </div>
                 </div>
+
+                <!-- BiH -->
+                <div class="rounded-2xl bg-slate-900/40 border border-slate-800 p-4">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-lg">🇧🇦</span>
+                        <span class="font-bold text-sm text-slate-200">Bosna i Hercegovina</span>
+                    </div>
+                    <div class="flex justify-between text-xs py-1 border-b border-slate-800">
+                        <span class="text-slate-400">BMB 95</span>
+                        <span class="font-bold text-white" id="bih-bmb95">-- €</span>
+                    </div>
+                    <div class="flex justify-between text-xs py-1 pt-2">
+                        <span class="text-slate-400">Eurodizel</span>
+                        <span class="font-bold text-white" id="bih-dizel">-- €</span>
+                    </div>
+                </div>
+
+                <!-- Hrvatska -->
+                <div class="rounded-2xl bg-slate-900/40 border border-slate-800 p-4">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-lg">🇭🇷</span>
+                        <span class="font-bold text-sm text-slate-200">Hrvatska</span>
+                    </div>
+                    <div class="flex justify-between text-xs py-1 border-b border-slate-800">
+                        <span class="text-slate-400">BMB 95</span>
+                        <span class="font-bold text-white" id="hr-bmb95">-- €</span>
+                    </div>
+                    <div class="flex justify-between text-xs py-1 pt-2">
+                        <span class="text-slate-400">Eurodizel</span>
+                        <span class="font-bold text-white" id="hr-dizel">-- €</span>
+                    </div>
+                </div>
+
             </div>
-
-            <!-- MOD 1: Sipam za X novca -->
-            <div id="calc-mode-money" class="grid md:grid-cols-3 gap-6">
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Izaberi Gorivo</label>
-                        <select id="m-fuel" onchange="calculateMoney()" class="w-full bg-dark-800 border border-dark-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-neon-emerald">
-                            <option value="1.53">Eurosuper 95 (1.53 KM)</option>
-                            <option value="1.57">Eurosuper 98 (1.57 KM)</option>
-                            <option value="1.41" selected>Eurodizel (1.41 KM)</option>
-                            <option value="1.37">Lož Ulje (1.37 KM)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Iznos novca (KM / €)</label>
-                        <input type="number" id="m-amount" value="20" oninput="calculateMoney()" placeholder="npr. 20" class="w-full bg-dark-800 border border-dark-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-neon-emerald">
-                    </div>
-                </div>
-
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Prosječna potrošnja auta (L/100km)</label>
-                        <input type="number" id="m-consumption" value="6.5" step="0.1" oninput="calculateMoney()" placeholder="npr. 6.5" class="w-full bg-dark-800 border border-dark-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-neon-emerald">
-                    </div>
-                </div>
-
-                <div class="bg-dark-800/80 border border-dark-700 rounded-2xl p-5 flex flex-col justify-center space-y-4">
-                    <div>
-                        <span class="text-xs text-slate-400">Dobijaš goriva:</span>
-                        <div class="text-3xl font-black text-neon-emerald" id="res-liters">14.18 L</div>
-                    </div>
-                    <div class="border-t border-dark-700 pt-3">
-                        <span class="text-xs text-slate-400">Procjena dometa:</span>
-                        <div class="text-xl font-bold text-white" id="res-range">~ 218 km</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- MOD 2: Put -->
-            <div id="calc-mode-trip" class="grid md:grid-cols-3 gap-6 hidden">
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Izaberi Gorivo</label>
-                        <select id="t-fuel" onchange="calculateTrip()" class="w-full bg-dark-800 border border-dark-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-neon-emerald">
-                            <option value="1.53">Eurosuper 95 (1.53 KM)</option>
-                            <option value="1.57">Eurosuper 98 (1.57 KM)</option>
-                            <option value="1.41" selected>Eurodizel (1.41 KM)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Dužina puta (km)</label>
-                        <input type="number" id="t-distance" value="150" oninput="calculateTrip()" placeholder="npr. 150" class="w-full bg-dark-800 border border-dark-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-neon-emerald">
-                    </div>
-                </div>
-
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Prosječna potrošnja (L/100km)</label>
-                        <input type="number" id="t-consumption" value="6.5" step="0.1" oninput="calculateTrip()" placeholder="npr. 6.5" class="w-full bg-dark-800 border border-dark-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-neon-emerald">
-                    </div>
-                </div>
-
-                <div class="bg-dark-800/80 border border-dark-700 rounded-2xl p-5 flex flex-col justify-center space-y-4">
-                    <div>
-                        <span class="text-xs text-slate-400">Ukupan trošak puta:</span>
-                        <div class="text-3xl font-black text-neon-blue" id="res-trip-cost">13.75 KM</div>
-                    </div>
-                    <div class="border-t border-dark-700 pt-3">
-                        <span class="text-xs text-slate-400">Potrebno goriva:</span>
-                        <div class="text-xl font-bold text-white" id="res-trip-liters">9.75 L</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Grafik Trenda -->
-        <section class="glass rounded-3xl p-6 border border-dark-700/50">
-            <h3 class="text-lg font-bold text-white mb-2">Istorija Cijena Goriva</h3>
-            <div id="trend-chart" class="h-72 w-full"></div>
-        </section>
+        </div>
 
     </main>
 
-    <footer class="border-t border-dark-700 bg-dark-900 py-6 text-center text-xs text-slate-600">
-        <p>© 2026 cijenegoriva.me — Sva prava zadržana.</p>
+    <footer class="border-t border-slate-800/80 py-6 text-center text-xs text-slate-500">
+        <p>© 2026 cijenegoriva.me • Sva prava zadržana.</p>
     </footer>
 
     <script>
-        function switchTab(mode) {
-            document.getElementById('calc-mode-money').classList.toggle('hidden', mode !== 'money');
-            document.getElementById('calc-mode-trip').classList.toggle('hidden', mode !== 'trip');
-            
-            document.getElementById('tab-money').classList.toggle('active', mode === 'money');
-            document.getElementById('tab-trip').classList.toggle('active', mode === 'trip');
-            
-            document.getElementById('tab-money').classList.toggle('text-slate-400', mode !== 'money');
-            document.getElementById('tab-trip').classList.toggle('text-slate-400', mode !== 'trip');
+        function updateDiffTag(elementId, current, next) {
+            const diffEl = document.getElementById(elementId);
+            if (!diffEl) return;
+
+            const currVal = parseFloat(current);
+            const nextVal = parseFloat(next);
+
+            if (isNaN(currVal) || isNaN(nextVal)) return;
+
+            const diff = (nextVal - currVal).toFixed(2);
+            if (diff > 0) {
+                diffEl.innerText = `+${diff} €`;
+                diffEl.className = 'text-xs font-semibold px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20';
+            } else if (diff < 0) {
+                diffEl.innerText = `${diff} €`;
+                diffEl.className = 'text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+            } else {
+                diffEl.innerText = 'Nepromijenjeno';
+                diffEl.className = 'text-xs font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-400';
+            }
         }
 
-        function calculateMoney() {
-            const price = parseFloat(document.getElementById('m-fuel').value);
-            const amount = parseFloat(document.getElementById('m-amount').value) || 0;
-            const cons = parseFloat(document.getElementById('m-consumption').value) || 1;
+        async function fetchPrices() {
+            try {
+                const res = await fetch('/api/prices');
+                const data = await res.json();
+                
+                // CG Cijene (Objektna struktura)
+                if (data && data.prices) {
+                    const current = data.prices.current || data.prices;
+                    const next = data.prices.next;
 
-            const liters = amount / price;
-            const range = (liters / cons) * 100;
+                    // Popuni trenutne cijene
+                    if (current.bmb98) document.getElementById('price-bmb98').innerText = current.bmb98;
+                    if (current.bmb95) document.getElementById('price-bmb95').innerText = current.bmb95;
+                    if (current.dizel) document.getElementById('price-dizel').innerText = current.dizel;
+                    if (current.lozulje) document.getElementById('price-lozulje').innerText = current.lozulje;
 
-            document.getElementById('res-liters').innerText = liters.toFixed(2) + " L";
-            document.getElementById('res-range').innerText = "~ " + Math.round(range) + " km";
+                    // Popuni nove cijene ako postoje
+                    if (next) {
+                        const types = ['bmb98', 'bmb95', 'dizel', 'lozulje'];
+                        types.forEach(type => {
+                            if (next[type]) {
+                                document.getElementById(`next-${type}`).innerText = next[type] + ' €';
+                                updateDiffTag(`diff-${type}`, current[type], next[type]);
+                                document.getElementById(`next-${type}-container`).classList.remove('hidden');
+                            }
+                        });
+                    }
+                }
+
+                // Nafta (Brent)
+                if (data && data.oil) {
+                    document.getElementById('oil-price').innerText = '$' + data.oil.price;
+                    const changeEl = document.getElementById('oil-change');
+                    const isPos = parseFloat(data.oil.change) >= 0;
+                    changeEl.innerText = (isPos ? '+' : '') + data.oil.change + '%';
+                    changeEl.className = 'text-xs font-semibold ' + (isPos ? 'text-rose-400' : 'text-emerald-400');
+                }
+
+                // Region
+                if (data && data.region) {
+                    document.getElementById('rs-bmb95').innerText = data.region.srbija.bmb95 + ' €';
+                    document.getElementById('rs-dizel').innerText = data.region.srbija.dizel + ' €';
+                    document.getElementById('bih-bmb95').innerText = data.region.bih.bmb95 + ' €';
+                    document.getElementById('bih-dizel').innerText = data.region.bih.dizel + ' €';
+                    document.getElementById('hr-bmb95').innerText = data.region.hrvatska.bmb95 + ' €';
+                    document.getElementById('hr-dizel').innerText = data.region.hrvatska.dizel + ' €';
+                }
+
+                document.getElementById('update-tag').innerText = 'Ažurirano uživo';
+            } catch (err) {
+                console.error('Greška:', err);
+            }
         }
 
-        function calculateTrip() {
-            const price = parseFloat(document.getElementById('t-fuel').value);
-            const dist = parseFloat(document.getElementById('t-distance').value) || 0;
-            const cons = parseFloat(document.getElementById('t-consumption').value) || 1;
-
-            const litersNeeded = (dist / 100) * cons;
-            const totalCost = litersNeeded * price;
-
-            document.getElementById('res-trip-cost').innerText = totalCost.toFixed(2) + " KM";
-            document.getElementById('res-trip-liters').innerText = litersNeeded.toFixed(2) + " L";
-        }
-
-        const options = {
-            series: [{
-                name: 'Eurosuper 95',
-                data: [1.48, 1.55, 1.50, 1.53]
-            }, {
-                name: 'Eurodizel',
-                data: [1.35, 1.40, 1.42, 1.41]
-            }],
-            chart: { height: 280, type: 'line', toolbar: { show: false }, background: 'transparent', foreColor: '#64748b' },
-            colors: ['#10b981', '#3b82f6'],
-            stroke: { curve: 'smooth', width: 3 },
-            grid: { borderColor: 'rgba(255,255,255,0.03)' },
-            xaxis: { categories: ['Mar', 'Apr', 'Maj', 'Jun'] },
-            tooltip: { theme: 'dark' }
-        };
-        new ApexCharts(document.querySelector("#trend-chart"), options).render();
-
-        calculateMoney();
-        calculateTrip();
+        fetchPrices();
     </script>
 </body>
 </html>
