@@ -1,7 +1,7 @@
 {
   "name": "cijenegoriva-me",
-  "version": "1.0.0",
-  "description": "Cijene goriva u Crnoj Gori - zvanični podaci",
+  "version": "2.0.0",
+  "description": "Cijene goriva na Balkanu - CG, SRB, BiH, HR, AL",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -15,9 +15,6 @@
     "node-cron": "^3.0.3",
     "axios": "^1.6.0",
     "dotenv": "^16.3.1"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.2"
   },
   "engines": {
     "node": ">=18.0.0"

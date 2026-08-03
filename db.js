@@ -4,104 +4,144 @@ const path = require('path');
 const DB_PATH = path.join(__dirname, 'data', 'prices.json');
 const HISTORY_PATH = path.join(__dirname, 'data', 'history.json');
 
-// Ensure data directory exists
 const dataDir = path.join(__dirname, 'data');
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
-}
+if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 
-// Seed data from official Montenegro government sources (gov.me / Ministry of Energy)
-// Based on real historical data 2024-2026
-const defaultPrices = {
-  "lastUpdated": "2026-08-04T08:00:00+02:00",
-  "source": "Ministarstvo energetike i rudarstva Crne Gore",
-  "sourceUrl": "https://www.gov.me",
-  "validFrom": "2026-08-04",
-  "validUntil": "2026-08-11",
-  "currency": "EUR",
-  "unit": "L",
-  "fuels": [
-    {
-      "id": "bmb95",
-      "name": "BMB 95",
-      "nameFull": "EURO SUPER 95 EN 228",
-      "price": 1.52,
-      "pricePrevious": 1.50,
-      "change": 0.02,
-      "changePercent": 1.33,
-      "trend": "up",
-      "icon": "gas-green",
-      "color": "#059669"
-    },
-    {
-      "id": "bmb98",
-      "name": "BMB 98",
-      "nameFull": "EURO SUPER 98 EN 228",
-      "price": 1.56,
-      "pricePrevious": 1.54,
-      "change": 0.02,
-      "changePercent": 1.30,
-      "trend": "up",
-      "icon": "gas-blue",
-      "color": "#2563eb"
-    },
-    {
-      "id": "eurodizel",
-      "name": "Eurodizel",
-      "nameFull": "EURODIESEL EN 590 (10 ppm)",
-      "price": 1.57,
-      "pricePrevious": 1.55,
-      "change": 0.02,
-      "changePercent": 1.29,
-      "trend": "up",
-      "icon": "gas-dark",
-      "color": "#374151"
-    },
-    {
-      "id": "lozulje",
-      "name": "Lož ulje",
-      "nameFull": "LOŽ ULJE (gasoil 0.1%)",
-      "price": 1.72,
-      "pricePrevious": 1.70,
-      "change": 0.02,
-      "changePercent": 1.18,
-      "trend": "up",
-      "icon": "oil",
-      "color": "#ea580c"
-    }
-  ]
+// Kursne liste (avgust 2026)
+const RATES = {
+  EUR: 1,
+  RSD: 117.50,
+  BAM: 1.95583,
+  ALL: 123.50
 };
 
-// Historical data from official PBK reports (Parlamentarna budžetska kancelarija)
+const defaultPrices = {
+  "lastUpdated": "2026-08-04T08:00:00+02:00",
+  "countries": {
+    "me": {
+      "name": "Crna Gora",
+      "flag": "🇲🇪",
+      "currency": "EUR",
+      "source": "Ministarstvo energetike i rudarstva CG",
+      "fuels": [
+        { "id": "bmb95", "name": "BMB 95", "price": 1.77, "pricePrev": 1.75, "change": 0.02, "trend": "up", "icon": "gas-green", "color": "#059669" },
+        { "id": "bmb98", "name": "BMB 98", "price": 1.81, "pricePrev": 1.79, "change": 0.02, "trend": "up", "icon": "gas-blue", "color": "#2563eb" },
+        { "id": "eurodizel", "name": "Eurodizel", "price": 1.79, "pricePrev": 1.77, "change": 0.02, "trend": "up", "icon": "gas-dark", "color": "#374151" },
+        { "id": "lozulje", "name": "Lož ulje", "price": 1.79, "pricePrev": 1.77, "change": 0.02, "trend": "up", "icon": "oil", "color": "#ea580c" }
+      ]
+    },
+    "rs": {
+      "name": "Srbija",
+      "flag": "🇷🇸",
+      "currency": "RSD",
+      "source": "Ministarstvo trgovine RS / Mondo",
+      "fuels": [
+        { "id": "bmb95", "name": "Evropremijum BMB 95", "price": 202.00, "pricePrev": 200.00, "change": 2.00, "trend": "up", "icon": "gas-green", "color": "#059669" },
+        { "id": "eurodizel", "name": "Eurodizel", "price": 226.00, "pricePrev": 224.00, "change": 2.00, "trend": "up", "icon": "gas-dark", "color": "#374151" },
+        { "id": "bmb98", "name": "BMB 98", "price": 220.00, "pricePrev": 218.00, "change": 2.00, "trend": "up", "icon": "gas-blue", "color": "#2563eb" },
+        { "id": "autoplin", "name": "Autoplin (LPG)", "price": 106.00, "pricePrev": 106.00, "change": 0, "trend": "flat", "icon": "gas-orange", "color": "#ea580c" }
+      ]
+    },
+    "ba": {
+      "name": "Bosna i Hercegovina",
+      "flag": "🇧🇦",
+      "currency": "BAM",
+      "source": "bihamk.ba / FMT",
+      "fuels": [
+        { "id": "bmb95", "name": "BMB 95", "price": 2.84, "pricePrev": 2.82, "change": 0.02, "trend": "up", "icon": "gas-green", "color": "#059669" },
+        { "id": "eurodizel", "name": "Dizel", "price": 2.91, "pricePrev": 2.89, "change": 0.02, "trend": "up", "icon": "gas-dark", "color": "#374151" },
+        { "id": "bmb98", "name": "BMB 98", "price": 3.07, "pricePrev": 3.05, "change": 0.02, "trend": "up", "icon": "gas-blue", "color": "#2563eb" },
+        { "id": "autoplin", "name": "Autoplin (LPG)", "price": 1.40, "pricePrev": 1.40, "change": 0, "trend": "flat", "icon": "gas-orange", "color": "#ea580c" }
+      ]
+    },
+    "hr": {
+      "name": "Hrvatska",
+      "flag": "🇭🇷",
+      "currency": "EUR",
+      "source": "Vlada RH / dnevnik.hr",
+      "fuels": [
+        { "id": "bmb95", "name": "Eurosuper 95", "price": 1.62, "pricePrev": 1.60, "change": 0.02, "trend": "up", "icon": "gas-green", "color": "#059669" },
+        { "id": "eurodizel", "name": "Eurodizel", "price": 1.77, "pricePrev": 1.75, "change": 0.02, "trend": "up", "icon": "gas-dark", "color": "#374151" },
+        { "id": "bmb98", "name": "Eurosuper 98", "price": 2.21, "pricePrev": 2.19, "change": 0.02, "trend": "up", "icon": "gas-blue", "color": "#2563eb" },
+        { "id": "plavi_dizel", "name": "Plavi dizel", "price": 1.36, "pricePrev": 1.36, "change": 0, "trend": "flat", "icon": "gas-blue", "color": "#3b82f6" }
+      ]
+    },
+    "al": {
+      "name": "Albanija",
+      "flag": "🇦🇱",
+      "currency": "ALL",
+      "source": "Ministria e Infrastrukturës / bihamk",
+      "fuels": [
+        { "id": "bmb95", "name": "Benzin 95", "price": 182.00, "pricePrev": 180.00, "change": 2.00, "trend": "up", "icon": "gas-green", "color": "#059669" },
+        { "id": "eurodizel", "name": "Dizel", "price": 185.00, "pricePrev": 183.00, "change": 2.00, "trend": "up", "icon": "gas-dark", "color": "#374151" },
+        { "id": "bmb98", "name": "Benzin 98", "price": 195.00, "pricePrev": 193.00, "change": 2.00, "trend": "up", "icon": "gas-blue", "color": "#2563eb" },
+        { "id": "lpg", "name": "LPG", "price": 69.00, "pricePrev": 69.00, "change": 0, "trend": "flat", "icon": "gas-orange", "color": "#ea580c" }
+      ]
+    }
+  }
+};
+
 const defaultHistory = {
-  "bmb95": [
-    { "date": "2026-07-07", "price": 1.48 },
-    { "date": "2026-07-14", "price": 1.49 },
-    { "date": "2026-07-21", "price": 1.50 },
-    { "date": "2026-07-28", "price": 1.50 },
-    { "date": "2026-08-04", "price": 1.52 }
-  ],
-  "bmb98": [
-    { "date": "2026-07-07", "price": 1.52 },
-    { "date": "2026-07-14", "price": 1.53 },
-    { "date": "2026-07-21", "price": 1.54 },
-    { "date": "2026-07-28", "price": 1.54 },
-    { "date": "2026-08-04", "price": 1.56 }
-  ],
-  "eurodizel": [
-    { "date": "2026-07-07", "price": 1.53 },
-    { "date": "2026-07-14", "price": 1.54 },
-    { "date": "2026-07-21", "price": 1.55 },
-    { "date": "2026-07-28", "price": 1.55 },
-    { "date": "2026-08-04", "price": 1.57 }
-  ],
-  "lozulje": [
-    { "date": "2026-07-07", "price": 1.68 },
-    { "date": "2026-07-14", "price": 1.69 },
-    { "date": "2026-07-21", "price": 1.70 },
-    { "date": "2026-07-28", "price": 1.70 },
-    { "date": "2026-08-04", "price": 1.72 }
-  ]
+  "me": {
+    "bmb95": [
+      { "date": "2026-06-02", "price": 1.65 }, { "date": "2026-06-16", "price": 1.68 },
+      { "date": "2026-06-30", "price": 1.70 }, { "date": "2026-07-14", "price": 1.73 },
+      { "date": "2026-07-28", "price": 1.75 }, { "date": "2026-08-04", "price": 1.77 }
+    ],
+    "eurodizel": [
+      { "date": "2026-06-02", "price": 1.69 }, { "date": "2026-06-16", "price": 1.72 },
+      { "date": "2026-06-30", "price": 1.74 }, { "date": "2026-07-14", "price": 1.76 },
+      { "date": "2026-07-28", "price": 1.77 }, { "date": "2026-08-04", "price": 1.79 }
+    ]
+  },
+  "rs": {
+    "bmb95": [
+      { "date": "2026-06-02", "price": 192 }, { "date": "2026-06-16", "price": 195 },
+      { "date": "2026-06-30", "price": 198 }, { "date": "2026-07-14", "price": 200 },
+      { "date": "2026-07-28", "price": 200 }, { "date": "2026-08-04", "price": 202 }
+    ],
+    "eurodizel": [
+      { "date": "2026-06-02", "price": 215 }, { "date": "2026-06-16", "price": 219 },
+      { "date": "2026-06-30", "price": 222 }, { "date": "2026-07-14", "price": 224 },
+      { "date": "2026-07-28", "price": 224 }, { "date": "2026-08-04", "price": 226 }
+    ]
+  },
+  "ba": {
+    "bmb95": [
+      { "date": "2026-06-02", "price": 2.75 }, { "date": "2026-06-16", "price": 2.78 },
+      { "date": "2026-06-30", "price": 2.80 }, { "date": "2026-07-14", "price": 2.82 },
+      { "date": "2026-07-28", "price": 2.82 }, { "date": "2026-08-04", "price": 2.84 }
+    ],
+    "eurodizel": [
+      { "date": "2026-06-02", "price": 3.00 }, { "date": "2026-06-16", "price": 3.04 },
+      { "date": "2026-06-30", "price": 2.89 }, { "date": "2026-07-14", "price": 2.89 },
+      { "date": "2026-07-28", "price": 2.89 }, { "date": "2026-08-04", "price": 2.91 }
+    ]
+  },
+  "hr": {
+    "bmb95": [
+      { "date": "2026-06-02", "price": 1.58 }, { "date": "2026-06-16", "price": 1.60 },
+      { "date": "2026-06-30", "price": 1.60 }, { "date": "2026-07-14", "price": 1.61 },
+      { "date": "2026-07-28", "price": 1.60 }, { "date": "2026-08-04", "price": 1.62 }
+    ],
+    "eurodizel": [
+      { "date": "2026-06-02", "price": 1.72 }, { "date": "2026-06-16", "price": 1.74 },
+      { "date": "2026-06-30", "price": 1.75 }, { "date": "2026-07-14", "price": 1.76 },
+      { "date": "2026-07-28", "price": 1.75 }, { "date": "2026-08-04", "price": 1.77 }
+    ]
+  },
+  "al": {
+    "bmb95": [
+      { "date": "2026-06-02", "price": 175 }, { "date": "2026-06-16", "price": 177 },
+      { "date": "2026-06-30", "price": 179 }, { "date": "2026-07-14", "price": 180 },
+      { "date": "2026-07-28", "price": 180 }, { "date": "2026-08-04", "price": 182 }
+    ],
+    "eurodizel": [
+      { "date": "2026-06-02", "price": 178 }, { "date": "2026-06-16", "price": 180 },
+      { "date": "2026-06-30", "price": 182 }, { "date": "2026-07-14", "price": 183 },
+      { "date": "2026-07-28", "price": 183 }, { "date": "2026-08-04", "price": 185 }
+    ]
+  }
 };
 
 class Database {
@@ -116,9 +156,7 @@ class Database {
         const raw = fs.readFileSync(filePath, 'utf-8');
         return JSON.parse(raw);
       }
-    } catch (err) {
-      console.error('DB load error:', err.message);
-    }
+    } catch (e) { console.error('DB load error:', e.message); }
     fs.writeFileSync(filePath, JSON.stringify(defaultData, null, 2));
     return defaultData;
   }
@@ -127,56 +165,53 @@ class Database {
     try {
       fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
       return true;
-    } catch (err) {
-      console.error('DB save error:', err.message);
-      return false;
-    }
+    } catch (e) { console.error('DB save error:', e.message); return false; }
   }
 
-  getPrices() {
+  getPrices(countryCode = null) {
+    if (countryCode && this.prices.countries[countryCode]) {
+      return { ...this.prices, current: this.prices.countries[countryCode] };
+    }
     return this.prices;
   }
 
-  getHistory(fuelId = null, limit = 52) {
-    if (fuelId && this.history[fuelId]) {
-      return this.history[fuelId].slice(-limit);
-    }
-    return this.history;
+  getHistory(countryCode, fuelId = null, limit = 52) {
+    const hist = this.history[countryCode];
+    if (!hist) return {};
+    if (fuelId && hist[fuelId]) return hist[fuelId].slice(-limit);
+    return hist;
   }
 
-  updatePrices(newPricesData) {
-    // Archive current prices to history before updating
+  getCountries() {
+    return Object.entries(this.prices.countries).map(([code, data]) => ({
+      code, name: data.name, flag: data.flag, currency: data.currency
+    }));
+  }
+
+  updateCountryPrices(countryCode, fuelsData) {
+    if (!this.prices.countries[countryCode]) return null;
+    const country = this.prices.countries[countryCode];
     const now = new Date().toISOString().split('T')[0];
 
-    newPricesData.fuels.forEach(fuel => {
-      if (!this.history[fuel.id]) this.history[fuel.id] = [];
-      this.history[fuel.id].push({
-        date: now,
-        price: fuel.price
-      });
-      // Keep only last 104 entries (2 years weekly)
-      if (this.history[fuel.id].length > 104) {
-        this.history[fuel.id] = this.history[fuel.id].slice(-104);
+    if (!this.history[countryCode]) this.history[countryCode] = {};
+
+    fuelsData.forEach(fuel => {
+      if (!this.history[countryCode][fuel.id]) this.history[countryCode][fuel.id] = [];
+      this.history[countryCode][fuel.id].push({ date: now, price: fuel.price });
+      if (this.history[countryCode][fuel.id].length > 104) {
+        this.history[countryCode][fuel.id] = this.history[countryCode][fuel.id].slice(-104);
       }
     });
 
-    this.prices = { ...this.prices, ...newPricesData, lastUpdated: new Date().toISOString() };
+    country.fuels = fuelsData;
+    this.prices.lastUpdated = new Date().toISOString();
 
     this._save(DB_PATH, this.prices);
     this._save(HISTORY_PATH, this.history);
-
     return this.prices;
   }
 
-  getStats() {
-    const fuels = this.prices.fuels;
-    return {
-      totalUpdates: Object.values(this.history).reduce((sum, arr) => sum + arr.length, 0),
-      lastScraped: this.prices.lastUpdated,
-      fuelCount: fuels.length,
-      averagePrice: (fuels.reduce((s, f) => s + f.price, 0) / fuels.length).toFixed(3)
-    };
-  }
+  getRates() { return RATES; }
 }
 
 module.exports = new Database();
