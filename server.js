@@ -1,29 +1,23 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const cron = require('node-cron');
 const { runScraper } = require('./scraper');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, 'data', 'latest.json');
 
-// Serviranje statičkih fajlova iz "public" direktorijuma
 app.use(express.static(path.join(__dirname, 'public')));
 
-/**
- * GET /api/prices
- * Vraća najnovije podatke o cijenama goriva (trenutne, nove od utorka, nafta, region)
- */
+// GET /api/prices
 app.get('/api/prices', async (req, res) => {
     try {
         let data = null;
-
-        // Ako lokalni JSON fajl postoji, učitaj iz njega
         if (fs.existsSync(DATA_FILE)) {
             const rawData = fs.readFileSync(DATA_FILE, 'utf8');
             data = JSON.parse(rawData);
         } else {
-            // Ako fajl još ne postoji, pokreni skraper da ga generiše
             console.log('Fajl sa podacima ne postoji. Pokrećem skraper...');
             data = await runScraper();
         }
@@ -39,10 +33,7 @@ app.get('/api/prices', async (req, res) => {
     }
 });
 
-/**
- * GET /api/refresh
- * Ručno/cron pokretanje skrapera za ažuriranje podataka
- */
+// Ručno osvežavanje po potrebi
 app.get('/api/refresh', async (req, res) => {
     try {
         const newData = await runScraper();
@@ -56,15 +47,27 @@ app.get('/api/refresh', async (req, res) => {
     }
 });
 
-// Fallback na index.html za sve ostale rute
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// AUTOMATIZACIJA (CRON JOBS)
+
+// 1. Ponedjeljkom i utorkom: Provjeravaj svakih 15 minuta (od 08:00 do 20:00h) radi novih cijena
+cron.schedule('*/15 8-20 * * 1,2', async () => {
+    console.log('[CRON] Pokretanje skrapera (Ponedjeljak/Utorak provjera)...');
+    await runScraper();
+});
+
+// 2. Svakog dana: Osvježi cijene nafte i regiona na svakih 6 sati
+cron.schedule('0 */6 * * *', async () => {
+    console.log('[CRON] Redovno 6-časovno osvežavanje podataka...');
+    await runScraper();
+});
+
 // Pokretanje servera
 app.listen(PORT, () => {
-    console.log(`Server je pokrenut na portu ${PORT}`);
-    
-    // Inicijalno pokretanje skrapera pri startu servera
-    runScraper().catch(err => console.error('Greška pri inicijalnom skrapovanju:', err.message));
+    console.log(`Server pokrenut na portu ${PORT}`);
+    // Inicijalno skrapovanje odmah po startovanju servera
+    runScraper().catch(err => console.error('Greška pri startnom skrapovanju:', err.message));
 });
