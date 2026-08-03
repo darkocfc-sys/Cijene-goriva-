@@ -1,0 +1,17 @@
+{
+  "name": "cijenegoriva-me",
+  "version": "1.0.0",
+  "description": "Pracenje cijena goriva u Crnoj Gori",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "scrape": "node scraper.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cheerio": "^1.0.0",
+    "node-cron": "^3.0.3",
+    "better-sqlite3": "^11.3.0"
+  }
+}
