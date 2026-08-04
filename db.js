@@ -26,8 +26,8 @@ const defaultPrices = {
       "fuels": [
         { "id": "bmb95", "name": "BMB 95", "price": 1.77, "pricePrev": 1.75, "change": 0.02, "trend": "up", "icon": "gas-green", "color": "#059669" },
         { "id": "bmb98", "name": "BMB 98", "price": 1.81, "pricePrev": 1.79, "change": 0.02, "trend": "up", "icon": "gas-blue", "color": "#2563eb" },
-        { "id": "eurodizel", "name": "Eurodizel", "price": 1.79, "pricePrev": 1.77, "change": 0.02, "trend": "up", "icon": "gas-dark", "color": "#374151" },
-        { "id": "lozulje", "name": "Lož ulje", "price": 1.79, "pricePrev": 1.77, "change": 0.02, "trend": "up", "icon": "oil", "color": "#ea580c" }
+        { "id": "eurodizel", "name": "Eurodizel", "price": 1.81, "pricePrev": 1.77, "change": 0.04, "trend": "up", "icon": "gas-dark", "color": "#374151" },
+        { "id": "lozulje", "name": "Lož ulje", "price": 1.81, "pricePrev": 1.77, "change": 0.04, "trend": "up", "icon": "oil", "color": "#ea580c" }
       ]
     },
     "rs": {
