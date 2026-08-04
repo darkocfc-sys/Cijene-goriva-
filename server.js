@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -10,6 +11,31 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+
+// --- Basic auth za admin rute ---
+// ADMIN_USER i ADMIN_PASS se podešavaju kao environment varijable (nikad u kodu!)
+function requireAuth(req, res, next) {
+  const user = process.env.ADMIN_USER;
+  const pass = process.env.ADMIN_PASS;
+
+  if (!user || !pass) {
+    console.error('[AUTH] ADMIN_USER / ADMIN_PASS nisu podešeni u environment varijablama!');
+    return res.status(500).send('Admin nije podešen. Kontaktiraj administratora.');
+  }
+
+  const auth = req.headers.authorization;
+  if (!auth || !auth.startsWith('Basic ')) {
+    res.set('WWW-Authenticate', 'Basic realm="Admin"');
+    return res.status(401).send('Potrebna autentifikacija');
+  }
+
+  const [u, p] = Buffer.from(auth.split(' ')[1], 'base64').toString().split(':');
+  if (u !== user || p !== pass) {
+    res.set('WWW-Authenticate', 'Basic realm="Admin"');
+    return res.status(401).send('Pogrešno korisničko ime ili lozinka');
+  }
+  next();
+}
 
 // API: list countries
 app.get('/api/countries', (req, res) => {
@@ -75,8 +101,8 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// API: scrape
-app.post('/api/scrape', async (req, res) => {
+// API: scrape (zaštićeno - ne treba da bude javno pozivljivo)
+app.post('/api/scrape', requireAuth, async (req, res) => {
   try {
     const result = await scrapePrices();
     res.json({ success: true, data: result });
@@ -85,8 +111,8 @@ app.post('/api/scrape', async (req, res) => {
   }
 });
 
-// ADMIN: update country prices
-app.post('/api/admin/update', (req, res) => {
+// ADMIN: update country prices (zaštićeno)
+app.post('/api/admin/update', requireAuth, (req, res) => {
   try {
     const { country, fuels } = req.body;
     if (!country || !fuels || !Array.isArray(fuels)) {
@@ -114,6 +140,11 @@ app.post('/api/admin/update', (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
+// Admin stranica - zaštićena, MORA biti prije express.static ispod
+// (Express koristi prvu rutu koja se poklopi, pa ova ruta "presretne" zahtjev
+// prije nego static middleware stigne da posluži admin.html javno)
+app.get('/admin.html', requireAuth, (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 
 // Static files
 app.use(express.static(__dirname));
