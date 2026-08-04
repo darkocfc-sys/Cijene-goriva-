@@ -4,6 +4,24 @@ const db = require('./db');
 
 const SOURCES = [
   {
+    name: 'gov.me',
+    url: 'https://www.gov.me/pretraga?tags=254',
+    type: 'govme',
+    countries: ['me']
+  },
+  {
+    name: 'obracun.me',
+    url: 'https://www.obracun.me/cijene-goriva/crna-gora',
+    type: 'obracun',
+    countries: ['me']
+  },
+  {
+    name: 'cijenagoriva.me',
+    url: 'https://cijenagoriva.me/',
+    type: 'cijenagoriva',
+    countries: ['me']
+  },
+  {
     name: 'bihamk.ba',
     url: 'https://bihamk.ba/spi/servisne-informacije/cijene-goriva',
     type: 'bihamk',
@@ -98,6 +116,84 @@ async function scrapeDnevnik() {
     return null;
   } catch (err) {
     console.error('[SCRAPER] dnevnik.hr greška:', err.message);
+    return null;
+  }
+}
+
+async function scrapeGovMe() {
+  try {
+    console.log('[SCRAPER] gov.me...');
+    const { data } = await axios.get(SOURCES[0].url, {
+      timeout: 15000,
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+    });
+    const text = cheerio.load(data)('body').text();
+    const bmb95 = text.match(/EUROSUPER 95[\s\-:]+([\d.,]+)[\s]*eur/i);
+    const bmb98 = text.match(/EUROSUPER 98[\s\-:]+([\d.,]+)[\s]*eur/i);
+    const dizel = text.match(/EURODIZEL[\s\-:]+([\d.,]+)[\s]*eur/i);
+    const loz = text.match(/LOŽ ULJE[\s\-:]+([\d.,]+)[\s]*eur/i);
+    if (bmb95 && dizel) {
+      console.log('[SCRAPER] gov.me uspješno: me');
+      return { me: {
+        bmb95: parseFloat(bmb95[1].replace(',', '.')),
+        bmb98: bmb98 ? parseFloat(bmb98[1].replace(',', '.')) : null,
+        eurodizel: parseFloat(dizel[1].replace(',', '.')),
+        lozulje: loz ? parseFloat(loz[1].replace(',', '.')) : null
+      }};
+    }
+    return null;
+  } catch (err) {
+    console.error('[SCRAPER] gov.me greška:', err.message);
+    return null;
+  }
+}
+
+async function scrapeObracun() {
+  try {
+    console.log('[SCRAPER] obracun.me...');
+    const { data } = await axios.get(SOURCES[1].url, {
+      timeout: 15000,
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+    });
+    const text = cheerio.load(data)('body').text();
+    const bmb95 = text.match(/Eurosuper 95[\s\-:]+([\d.,]+)[\s]*EUR/i);
+    const dizel = text.match(/Eurodizel[\s\-:]+([\d.,]+)[\s]*EUR/i);
+    if (bmb95 && dizel) {
+      console.log('[SCRAPER] obracun.me uspješno: me');
+      return { me: {
+        bmb95: parseFloat(bmb95[1].replace(',', '.')),
+        eurodizel: parseFloat(dizel[1].replace(',', '.'))
+      }};
+    }
+    return null;
+  } catch (err) {
+    console.error('[SCRAPER] obracun.me greška:', err.message);
+    return null;
+  }
+}
+
+async function scrapeCijenaGoriva() {
+  try {
+    console.log('[SCRAPER] cijenagoriva.me...');
+    const { data } = await axios.get(SOURCES[2].url, {
+      timeout: 15000,
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+    });
+    const text = cheerio.load(data)('body').text();
+    const bmb95 = text.match(/Benzin 95[\s\-:]+([\d.,]+)[\s]*EUR/i);
+    const dizel = text.match(/Dizel[\s\-:]+([\d.,]+)[\s]*EUR/i);
+    const bmb98 = text.match(/Benzin 98[\s\-:]+([\d.,]+)[\s]*EUR/i);
+    if (bmb95 && dizel) {
+      console.log('[SCRAPER] cijenagoriva.me uspješno: me');
+      return { me: {
+        bmb95: parseFloat(bmb95[1].replace(',', '.')),
+        bmb98: bmb98 ? parseFloat(bmb98[1].replace(',', '.')) : null,
+        eurodizel: parseFloat(dizel[1].replace(',', '.'))
+      }};
+    }
+    return null;
+  } catch (err) {
+    console.error('[SCRAPER] cijenagoriva.me greška:', err.message);
     return null;
   }
 }

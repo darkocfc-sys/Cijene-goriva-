@@ -16,7 +16,7 @@ const RATES = {
 };
 
 const defaultPrices = {
-  "lastUpdated": "2026-08-04T08:00:00+02:00",
+  "lastUpdated": "2026-08-04T16:00:00+02:00",
   "countries": {
     "me": {
       "name": "Crna Gora",
@@ -24,10 +24,10 @@ const defaultPrices = {
       "currency": "EUR",
       "source": "Ministarstvo energetike i rudarstva CG",
       "fuels": [
-        { "id": "bmb95", "name": "BMB 95", "price": 1.77, "pricePrev": 1.75, "change": 0.02, "trend": "up", "icon": "gas-green", "color": "#059669" },
-        { "id": "bmb98", "name": "BMB 98", "price": 1.81, "pricePrev": 1.79, "change": 0.02, "trend": "up", "icon": "gas-blue", "color": "#2563eb" },
-        { "id": "eurodizel", "name": "Eurodizel", "price": 1.81, "pricePrev": 1.77, "change": 0.04, "trend": "up", "icon": "gas-dark", "color": "#374151" },
-        { "id": "lozulje", "name": "Lož ulje", "price": 1.81, "pricePrev": 1.77, "change": 0.04, "trend": "up", "icon": "oil", "color": "#ea580c" }
+        { "id": "bmb95", "name": "Eurosuper 95", "price": 1.75, "pricePrev": 1.77, "change": 0.02, "trend": "down", "icon": "gas-green", "color": "#059669" },
+        { "id": "bmb98", "name": "Eurosuper 98", "price": 1.79, "pricePrev": 1.81, "change": 0.02, "trend": "down", "icon": "gas-blue", "color": "#2563eb" },
+        { "id": "eurodizel", "name": "Eurodizel", "price": 1.85, "pricePrev": 1.79, "change": 0.06, "trend": "up", "icon": "gas-dark", "color": "#374151" },
+        { "id": "lozulje", "name": "Lož ulje", "price": 1.80, "pricePrev": 1.79, "change": 0.01, "trend": "up", "icon": "oil", "color": "#ea580c" }
       ]
     },
     "rs": {
@@ -86,12 +86,18 @@ const defaultHistory = {
     "bmb95": [
       { "date": "2026-06-02", "price": 1.65 }, { "date": "2026-06-16", "price": 1.68 },
       { "date": "2026-06-30", "price": 1.70 }, { "date": "2026-07-14", "price": 1.73 },
-      { "date": "2026-07-28", "price": 1.75 }, { "date": "2026-08-04", "price": 1.77 }
+      { "date": "2026-07-28", "price": 1.77 }, { "date": "2026-08-04", "price": 1.75 }
+    ],
+    "bmb98": [
+      { "date": "2026-07-28", "price": 1.81 }, { "date": "2026-08-04", "price": 1.79 }
     ],
     "eurodizel": [
       { "date": "2026-06-02", "price": 1.69 }, { "date": "2026-06-16", "price": 1.72 },
       { "date": "2026-06-30", "price": 1.74 }, { "date": "2026-07-14", "price": 1.76 },
-      { "date": "2026-07-28", "price": 1.77 }, { "date": "2026-08-04", "price": 1.79 }
+      { "date": "2026-07-28", "price": 1.79 }, { "date": "2026-08-04", "price": 1.85 }
+    ],
+    "lozulje": [
+      { "date": "2026-07-28", "price": 1.79 }, { "date": "2026-08-04", "price": 1.80 }
     ]
   },
   "rs": {
